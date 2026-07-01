@@ -74,15 +74,24 @@ function ProfileDetailContent({ username, platform }: ProfileDetailContentProps)
   useEffect(() => {
     let cancelled = false;
 
-    loadProfileByUsername(username, platform).then((data) => {
-      if (cancelled) return;
-      if (data) {
-        setProfileData(data.data.user_profile);
-      } else {
-        setError(true);
+    async function loadProfile() {
+      try {
+        const data = await loadProfileByUsername(username, platform);
+        if (cancelled) return;
+
+        if (data) {
+          setProfileData(data.data.user_profile);
+        } else {
+          setError(true);
+        }
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
-    });
+    }
+
+    void loadProfile();
 
     return () => {
       cancelled = true;
@@ -278,5 +287,11 @@ export function ProfileDetailPage() {
     );
   }
 
-  return <ProfileDetailContent key={username} username={username} platform={platform} />;
+  return (
+    <ProfileDetailContent
+      key={`${platform}:${username}`}
+      username={username}
+      platform={platform}
+    />
+  );
 }
