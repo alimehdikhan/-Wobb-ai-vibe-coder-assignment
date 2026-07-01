@@ -9,31 +9,44 @@ const platformData: Record<Platform, SearchData> = {
   tiktok: tiktokData as SearchData,
 };
 
+/**
+ * Get raw search data for a platform.
+ */
 export function getSearchData(platform: Platform): SearchData {
   return platformData[platform];
 }
 
+/** Cache extracted profiles to avoid re-mapping on every call */
+const profileCache = new Map<Platform, UserProfileSummary[]>();
+
+/**
+ * Extract user profiles from platform search data (memoized).
+ */
 export function extractProfiles(platform: Platform): UserProfileSummary[] {
+  const cached = profileCache.get(platform);
+  if (cached) return cached;
+
   const data = getSearchData(platform);
-  return data.accounts.map((item) => item.account.user_profile);
+  const profiles = data.accounts.map((item) => ({
+    ...item.account.user_profile,
+    platform,
+  }));
+  profileCache.set(platform, profiles);
+  return profiles;
 }
 
+/**
+ * Filter profiles by search query against username and fullname.
+ */
 export function filterProfiles(
   profiles: UserProfileSummary[],
   query: string
 ): UserProfileSummary[] {
-  if (!query) return profiles;
-  return profiles.filter((p) => {
-    const matchUsername = p.username.includes(query);
-    const matchFullname = p.fullname.toLowerCase().includes(query.toLowerCase());
-    return matchUsername || matchFullname;
-  });
-}
-
-export const PLATFORMS: Platform[] = ["instagram", "youtube", "tiktok"];
-
-export function getPlatformLabel(platform: Platform): string {
-  if (platform === "instagram") return "Instagram";
-  if (platform === "youtube") return "YouTube";
-  return "TikTok";
+  if (!query.trim()) return profiles;
+  const q = query.toLowerCase().trim();
+  return profiles.filter(
+    (p) =>
+      (p.username || "").toLowerCase().includes(q) ||
+      (p.fullname || "").toLowerCase().includes(q)
+  );
 }
