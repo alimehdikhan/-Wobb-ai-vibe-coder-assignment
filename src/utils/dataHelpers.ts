@@ -20,6 +20,11 @@ export function getSearchData(platform: Platform): SearchData {
 /** Cache extracted profiles to avoid re-mapping on every call */
 const profileCache = new Map<Platform, UserProfileSummary[]>();
 
+/** Clear memoized profile cache (useful in tests). */
+export function clearProfileCache(): void {
+  profileCache.clear();
+}
+
 /**
  * Extract user profiles from platform search data (memoized).
  */

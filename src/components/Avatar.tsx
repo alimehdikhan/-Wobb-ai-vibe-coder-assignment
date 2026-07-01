@@ -33,13 +33,16 @@ export const Avatar = memo(function Avatar({
   className = "",
 }: AvatarProps) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const normalizedSrc = src?.trim() ?? "";
 
   useEffect(() => {
     setFailed(false);
+    setLoaded(false);
   }, [normalizedSrc]);
 
   const handleError = useCallback(() => setFailed(true), []);
+  const handleLoad = useCallback(() => setLoaded(true), []);
 
   const initials =
     (alt || "?")
@@ -69,7 +72,8 @@ export const Avatar = memo(function Avatar({
           loading="lazy"
           decoding="async"
           onError={handleError}
-          className="avatar__image"
+          onLoad={handleLoad}
+          className={`avatar__image${loaded ? " avatar__image--loaded" : ""}`}
         />
       ) : (
         <span className={`avatar__initials ${textClass}`} aria-hidden="true">

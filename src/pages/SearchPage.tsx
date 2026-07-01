@@ -62,7 +62,7 @@ export function SearchPage() {
           </div>
         </div>
 
-        <ProfileList profiles={filtered} platform={platform} />
+        <ProfileList key={platform} profiles={filtered} platform={platform} />
       </section>
 
       <SelectedList compact />

@@ -40,12 +40,8 @@ export const ProfileList = memo(function ProfileList({
   return (
     <ul className="profile-grid" aria-label="Influencer profiles">
       {profiles.map((profile, index) => (
-        <li
-          key={profile.user_id}
-          className="h-full animate-fade-in"
-          style={{ animationDelay: `${Math.min(index * 45, 360)}ms` }}
-        >
-          <ProfileCard profile={profile} platform={platform} />
+        <li key={profile.user_id} className="h-full">
+          <ProfileCard profile={profile} platform={platform} index={index} />
         </li>
       ))}
     </ul>

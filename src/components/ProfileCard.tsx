@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Platform, UserProfileSummary } from "@/types";
 import { formatCount, formatEngagementRate } from "@/utils/formatters";
@@ -10,6 +10,7 @@ import { PlatformIcon } from "./PlatformIcon";
 interface ProfileCardProps {
   profile: UserProfileSummary;
   platform: Platform;
+  index?: number;
 }
 
 function ProfileStat({
@@ -36,15 +37,20 @@ function ProfileStat({
 export const ProfileCard = memo(function ProfileCard({
   profile,
   platform,
+  index = 0,
 }: ProfileCardProps) {
   const addProfile = useSelectedProfiles((s) => s.addProfile);
   const isSelected = useSelectedProfiles((s) =>
     s.profiles.some((p) => p.username === profile.username)
   );
+  const [justAdded, setJustAdded] = useState(false);
 
   const handleAddToList = useCallback(() => {
+    if (isSelected) return;
     addProfile({ ...profile, platform });
-  }, [addProfile, profile, platform]);
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 500);
+  }, [addProfile, profile, platform, isSelected]);
 
   const engagementValue =
     profile.engagement_rate !== undefined
@@ -52,7 +58,10 @@ export const ProfileCard = memo(function ProfileCard({
       : "—";
 
   return (
-    <article className="profile-card animate-fade-in">
+    <article
+      className="profile-card animate-fade-in"
+      style={{ animationDelay: `${Math.min(index * 45, 360)}ms` }}
+    >
       <Link
         to={`/profile/${profile.username}?platform=${platform}`}
         className="profile-card__link"
@@ -94,7 +103,7 @@ export const ProfileCard = memo(function ProfileCard({
               ? `${profile.username} already in list`
               : `Add ${profile.username} to list`
           }
-          className={`btn-add ${isSelected ? "btn-add--added" : "btn-add--default"}`}
+          className={`btn-add ${isSelected ? "btn-add--added" : "btn-add--default"}${justAdded ? " btn-add--pop" : ""}`}
         >
           {isSelected ? (
             <>

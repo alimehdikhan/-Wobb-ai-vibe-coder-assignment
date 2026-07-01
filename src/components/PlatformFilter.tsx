@@ -98,7 +98,13 @@ export const PlatformFilter = memo(function PlatformFilter({
         </div>
       </div>
 
-      <div id="search-panel" role="tabpanel" aria-labelledby={`tab-${selected}`}>
+      <div
+        key={selected}
+        id="search-panel"
+        role="tabpanel"
+        aria-labelledby={`tab-${selected}`}
+        className="animate-fade-in"
+      >
         <label htmlFor={searchId} className="section-label block mb-2">
           Search
         </label>

@@ -193,8 +193,12 @@ export function SelectedList({ compact = true }: SelectedListProps) {
               strategy={verticalListSortingStrategy}
             >
               <ul className="flex flex-col gap-2 list-none p-0 m-0" aria-label="Selected influencer profiles">
-                {displayProfiles.map((profile) => (
-                  <li key={profile.username}>
+                {displayProfiles.map((profile, index) => (
+                  <li
+                    key={profile.username}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${Math.min(index * 40, 200)}ms` }}
+                  >
                     <SortableItem profile={profile} onRemove={removeProfile} />
                   </li>
                 ))}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelectedProfiles } from "@/store/selectedProfiles";
@@ -11,6 +11,18 @@ interface LayoutProps {
 export function Layout({ children, title }: LayoutProps) {
   const location = useLocation();
   const count = useSelectedProfiles((s) => s.profiles.length);
+  const [badgePulse, setBadgePulse] = useState(false);
+  const prevCount = useRef(count);
+
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setBadgePulse(true);
+      const timer = window.setTimeout(() => setBadgePulse(false), 450);
+      prevCount.current = count;
+      return () => window.clearTimeout(timer);
+    }
+    prevCount.current = count;
+  }, [count]);
 
   useEffect(() => {
     document.title = title
@@ -64,7 +76,10 @@ export function Layout({ children, title }: LayoutProps) {
             >
               My List
               {count > 0 && (
-                <span className="badge-count" aria-label={`${count} selected`}>
+                <span
+                  className={`badge-count${badgePulse ? " badge-count--pulse" : ""}`}
+                  aria-label={`${count} selected`}
+                >
                   {count}
                 </span>
               )}

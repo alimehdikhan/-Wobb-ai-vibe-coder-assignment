@@ -33,12 +33,29 @@ Open [http://localhost:5173](http://localhost:5173) to view the app locally.
 
 ## Scripts
 
-| Command           | Description              |
-| ----------------- | ------------------------ |
-| `npm run dev`     | Start development server |
-| `npm run build`   | Production build         |
-| `npm run lint`    | Run ESLint               |
-| `npm run preview` | Preview production build |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start development server                 |
+| `npm run build`        | Production build                         |
+| `npm run lint`         | Run ESLint                               |
+| `npm run typecheck`    | TypeScript project check                 |
+| `npm run test`         | Run unit & component tests (Vitest)      |
+| `npm run test:watch`   | Run tests in watch mode                  |
+| `npm run test:coverage`| Generate test coverage report            |
+| `npm run validate`     | Lint + typecheck + test + build          |
+| `npm run preview`      | Preview production build                 |
+
+## Testing
+
+Tests live alongside source files (`*.test.ts` / `*.test.tsx`) and use **Vitest** with **React Testing Library**.
+
+```bash
+npm run test          # single run
+npm run test:watch    # watch mode during development
+npm run test:coverage # HTML coverage in coverage/
+```
+
+Covered areas include formatters, data helpers, avatar resolution, the selected-profiles store, and key UI components (`Avatar`, `ProfileCard`, `PlatformFilter`).
 
 ## Routes
 
