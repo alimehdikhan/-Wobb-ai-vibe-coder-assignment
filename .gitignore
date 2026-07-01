@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local assignment/audit artifacts
+Wobb Assignment - Google Docs.pdf
+mcps/
+nul
+terminals/
