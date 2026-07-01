@@ -2,11 +2,25 @@
 
 A modern React application for searching, exploring, and curating influencer profiles across Instagram, YouTube, and TikTok.
 
-## Live Demo
+Built for the [Wobb Vibe Coder Assignment](https://github.com/Wobb-ai/vibe-coder-assignment).
 
-**[https://wobb-ai-vibe-coder-assignment.vercel.app/](https://wobb-ai-vibe-coder-assignment.vercel.app/)**
+## Submission
 
-Deployed on Vercel with SPA routing for `/`, `/list`, and `/profile/:username`.
+| | |
+|---|---|
+| **Live demo** | [https://wobb-ai-vibe-coder-assignment.vercel.app/](https://wobb-ai-vibe-coder-assignment.vercel.app/) |
+| **Repository** | [https://github.com/alimehdikhan/-Wobb-ai-vibe-coder-assignment](https://github.com/alimehdikhan/-Wobb-ai-vibe-coder-assignment) |
+
+Deployed on **Vercel** with SPA rewrites (`vercel.json`) so `/`, `/list`, and `/profile/:username` all work on direct navigation and refresh.
+
+## Features
+
+- Search and filter influencers by platform (Instagram, YouTube, TikTok)
+- Search by username or full name
+- Profile detail pages with extended stats
+- **Add to List** — curate, reorder, remove, and persist selections across refreshes
+- Responsive layout with dark mode (`prefers-color-scheme`)
+- Accessible keyboard navigation and ARIA patterns
 
 ## Getting Started
 
@@ -15,16 +29,25 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) to view the app.
+Open [http://localhost:5173](http://localhost:5173) to view the app locally.
 
 ## Scripts
 
-| Command          | Description              |
-| ---------------- | ------------------------ |
-| `npm run dev`    | Start development server |
-| `npm run build`  | Production build         |
-| `npm run lint`   | Run ESLint               |
-| `npm run preview`| Preview production build |
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start development server |
+| `npm run build`   | Production build         |
+| `npm run lint`    | Run ESLint               |
+| `npm run preview` | Preview production build |
+
+## Routes
+
+| Path | Page |
+|------|------|
+| `/` | Search / dashboard |
+| `/profile/:username?platform=` | Profile details |
+| `/list` | Curated influencer list |
+| `*` | Redirects to `/` |
 
 ---
 
@@ -34,118 +57,126 @@ Open [http://localhost:5173](http://localhost:5173) to view the app.
 
 | Bug | Fix |
 |-----|-----|
-| **`react-beautiful-dnd` incompatible with React 19** — uses deprecated `findDOMNode`, crashes on drag operations | Replaced with `@dnd-kit/core` + `@dnd-kit/sortable` (actively maintained, React 19 compatible) |
-| **Duplicate formatter functions** — `formatFollowersLocal` in ProfileCard, `formatFollowersDetail` in ProfileDetailPage, inline formatting in SelectedList | Consolidated into single `formatCount()` in `utils/formatters.ts` |
-| **Race condition in ProfileDetailPage** — no cleanup on unmount could set state after navigation | Added cancellation flag in useEffect cleanup |
-| **Unprofessional `<title>`** — was "assignment" | Changed to "WobbSearch — Influencer Discovery Platform" |
-| **Missing meta description** | Added SEO meta tags |
-| **Platform param not validated** — any string accepted | Added runtime validation defaulting to "instagram" |
-| **YouTube search filtering crash** — typing query when viewing YouTube tab crashed React | Safely wrapped username and fullname in filter helper to handle missing fields |
+| Disabled **Add to List** stub | Fully implemented with Zustand store |
+| **YouTube search crash** — missing `username`/`fullname` | Safe filtering + username fallback (`handle` → `user_id`) in `dataHelpers.ts` |
+| **Duplicate formatters** across components | Consolidated into `formatCount()` and `formatEngagementRate()` |
+| **Race condition** on profile detail navigation | Cancellation flag + async `try/catch/finally` loading |
+| **Infinite loading** on rejected profile chunk | Error path always clears loading state |
+| **Stale detail state** when platform query changes | Remount key `platform:username` + effect deps |
+| **Unprofessional document title** | Dynamic titles via `Layout` |
+| **Invalid platform query param** | Runtime validation with `instagram` default |
+| **`react-beautiful-dnd` React 19 crash** | Replaced with `@dnd-kit/*` |
+| **Duplicate SVG gradient IDs** | Unique IDs via `useId()` in `PlatformIcon` |
+| **Nested interactive elements** on profile cards | Separated `<Link>` and Add button |
 
 ### 2. State Management — Zustand
 
-Implemented list state with Zustand's `persist` middleware, which handles serialization and rehydration through `localStorage`.
+- `useSelectedProfiles` store with `persist` middleware
+- `partialize` saves only the `profiles` array to `localStorage`
+- Actions: `addProfile`, `removeProfile`, `reorderProfiles`, `clear`
+- Duplicate prevention by `username`
 
 ### 3. UI/UX Redesign
 
-- **Official Platform SVGs**: Integrated official platform SVG brand assets for Instagram (radial gradient camera), YouTube (red-white play button), and TikTok (offset cyan/magenta note).
-- **Platform Badges**: Added small platform SVG badge overlays on avatars across the search page grid, detail page header, and curation list.
-- **Typography**: Inter font from Google Fonts for a modern, professional feel
-- **Layout**: Glassmorphism header with `backdrop-blur`, responsive navigation with active states, footer
-- **Search Page**: Hero section with gradient heading, 2-column responsive grid for profile cards
-- **Profile Cards**: Platform accent bars, engagement rate display, responsive stat layout, image error fallback
-- **Profile Detail**: Staggered stat card animations, proper platform badge
-- **Dark Mode**: Full dark mode support via `prefers-color-scheme`
-- **Animations**: `fadeIn`, `slideUp` keyframes, staggered animation delays
-- **Empty States**: Reusable `EmptyState` component with icon, title, description, and action
+- **Design system** — CSS tokens for colors, surfaces, shadows, typography (`index.css`)
+- **Shared components** — `PageHeader`, `Layout`, `EmptyState`, consistent `.btn` / `.surface-card` patterns
+- **Platform branding** — official SVG icons with badge overlays on avatars
+- **Search page** — filter panel, section labels, responsive profile grid
+- **Profile cards** — platform accent bar, engagement stats, mobile-friendly layout
+- **Profile detail** — breadcrumb nav, stat grid, polished loading/error states
+- **Selected list** — inline preview (up to 3) on search page, full list on `/list`, drag-and-drop reorder
+- **Dark mode** — system preference via `prefers-color-scheme`
+- **Motion** — `fadeIn` / `slideUp` animations with `prefers-reduced-motion` support
 
-### 4. "Add to List" Feature — Full Implementation
+### 4. "Add to List" Feature
 
-- **Add profiles**: Click "Add to List" on any profile card or detail page
-- **Duplicate prevention**: Button disables and shows checkmark when already added
-- **View selected list**: Dedicated `/list` route + inline preview on search page
-- **Remove profiles**: Delete button on each item in the selected list
-- **Reorder profiles**: Drag-and-drop with `@dnd-kit` (keyboard accessible)
-- **Persistence**: Zustand `persist` middleware automatically saves to `localStorage`
-- **Navigation**: "My List" nav link with live count badge
+- Add from profile card or detail page
+- Duplicate prevention (button disables, shows "Added")
+- View on `/list` and inline on search page
+- Remove per item + Clear all (with confirmation)
+- Drag-and-drop reorder (`@dnd-kit`)
+- Persists after page refresh via Zustand `persist`
 
-### 5. Architecture Refactoring
+### 5. Architecture & Code Quality
 
-- **Centralized types**: `PLATFORM_VALUES`, `PLATFORM_META` in `types/index.ts` — single source of truth for platform labels, icons, and gradient colors
-- **Shared formatters**: `formatCount()` and `formatEngagementRate()` — no more duplicated formatting logic
-- **Reusable components**: `Avatar` (with error fallback), `EmptyState`, `VerifiedBadge` (proper SVG)
-- **Removed dead code**: Unused `onProfileClick` prop drilling, duplicate platform config objects
-- **Extracted helpers**: `buildStats()` in ProfileDetailPage for cleaner rendering logic
+- Clear folder structure: `components/`, `pages/`, `store/`, `utils/`, `types/`
+- Centralized `PLATFORM_META` and TypeScript interfaces
+- Reusable `Avatar`, `VerifiedBadge`, `PlatformIcon`, `PageHeader`
+- Profile loader with JSON chunk fallback to search summary data
+- `React.memo`, `useMemo`, `useCallback`, and fine-grained Zustand selectors
 
-### 6. Performance Optimizations
+### 6. Performance
 
-- **`React.memo`**: Applied to `ProfileCard`, `ProfileList`, `PlatformFilter`, `VerifiedBadge`, `Avatar` — prevents re-renders when Zustand store updates
-- **`useMemo`**: Memoized `extractProfiles()` and `filterProfiles()` in SearchPage
-- **`useCallback`**: Stable references for event handlers passed as props
-- **Zustand selectors**: Fine-grained selectors like `(s) => s.profiles.length` for count-only subscriptions
-- **Image lazy loading**: `loading="lazy"` on all profile images
-- **Data memoization**: `extractProfiles()` caches results by platform to avoid re-mapping
-- **Bundle size**: Approximately 330KB for the main production JavaScript bundle
+- Memoized profile extraction cache per platform
+- Lazy-loaded avatars
+- Code-split profile JSON via `import.meta.glob`
+- Main production bundle ~330 KB (~105 KB gzip)
 
 ### 7. Accessibility
 
-- ARIA `role="tablist"` / `role="tab"` / `aria-selected` on platform filters
-- `aria-label` on all interactive elements
-- `aria-live="polite"` on dynamic result count
-- `aria-expanded` / `aria-controls` on collapsible selected list
-- Native keyboard navigation for profile links and full arrow/Home/End navigation for platform tabs
-- `focus-visible` ring styling
-- Screen-reader friendly verified badge with `role="img"` and `aria-label`
+- Skip-to-main-content link
+- `aria-current="page"` on active nav links
+- Platform tabs: `tablist` / `tab` / `tabpanel`, Arrow/Home/End keyboard nav with focus management
+- `aria-live` result count, `aria-expanded` on collapsible list
+- Native keyboard navigation for profile links
+- `focus-visible` rings, screen-reader labels on interactive controls
+- `prefers-reduced-motion` respected
+
+### 8. Deployment
+
+- `vercel.json` SPA rewrite rule for client-side routing
+- Catch-all route redirects unknown paths to `/`
+- Auto-deploy on push to `main` via Vercel + GitHub integration
 
 ---
 
 ## Libraries Added
 
-| Library | Version | Justification |
-|---------|---------|--------------|
-| `@dnd-kit/core` | `^6.3.1` | Modern drag-and-drop — React 19 compatible, replaces broken `react-beautiful-dnd` |
-| `@dnd-kit/sortable` | `^10.0.0` | Sortable preset for list reordering |
-| `@dnd-kit/utilities` | `^3.2.2` | CSS transform utilities for smooth drag animations |
+| Library | Version | Purpose |
+|---------|---------|---------|
+| `zustand` | `^5.0.14` | Selected list state + `localStorage` persistence |
+| `@dnd-kit/core` | `^6.3.1` | Drag-and-drop (React 19 compatible) |
+| `@dnd-kit/sortable` | `^10.0.0` | Sortable list preset |
+| `@dnd-kit/utilities` | `^3.2.2` | Drag transform utilities |
 
 ## Libraries Removed
 
 | Library | Reason |
 |---------|--------|
-| `react-beautiful-dnd` | Deprecated, incompatible with React 19 (uses `findDOMNode`) |
+| `react-beautiful-dnd` | Deprecated; incompatible with React 19 |
 | `@types/react-beautiful-dnd` | No longer needed |
 
 ---
 
 ## Assumptions
 
-1. **Data is static JSON** — no API calls needed; data is imported at build time and code-split per profile
-2. **Dark mode follows system preference** — uses `prefers-color-scheme` media query (no manual toggle)
-3. **Username is a unique identifier** — used as the key for duplicate detection in the selected list
-4. **Profile images may fail** — external CDN URLs in sample data may expire; Avatar component handles this with initial fallback
-5. **Selected list is local-only** — persisted to `localStorage`, no backend sync needed
+1. **Static JSON data** — no backend API; profiles loaded at build time
+2. **Username as unique key** — used for routing, dedup, and list storage
+3. **YouTube handles as fallback** — some search entries lack `username`; `handle` or `user_id` is used instead
+4. **Not all profiles have detail JSON** — loader falls back to search summary when no detail file exists
+5. **Dark mode follows OS** — no manual theme toggle
+6. **Selected list is local-only** — `localStorage`, no server sync
 
 ## Trade-offs
 
 | Decision | Trade-off |
 |----------|-----------|
-| **@dnd-kit over native HTML drag** | Adds ~15KB but provides keyboard accessibility, mobile support, and smooth animations |
-| **Zustand persist middleware** | Slightly opinionated storage format vs full control, but handles edge cases (SSR, errors) automatically |
-| **Grid layout over virtualized list** | With only 10 profiles per platform, virtualization would add complexity without benefit |
-| **System dark mode** | Simpler than a manual toggle; users who want dark mode already have it configured in OS |
-| **No toast notifications** | Kept the UI clean; button state change (Add → ✓ Added) provides sufficient feedback |
+| **@dnd-kit** over native drag | ~15 KB extra; better a11y and mobile support |
+| **Zustand persist** | Opinionated storage format; simpler than manual `localStorage` |
+| **No virtualization** | Fine for 10 profiles/platform; would add complexity at scale |
+| **System dark mode** | No toggle; respects OS preference |
+| **No toast notifications** | Button state change provides sufficient feedback |
+| **Catch-all redirect** | Unknown URLs go to `/` instead of a dedicated 404 page |
 
 ## Future Improvements
 
-- **Virtual scrolling** — if data scales beyond 10 profiles per platform, use `@tanstack/virtual` for performance
-- **Search debouncing** — add debounce for API-backed search to reduce request frequency
-- **Manual dark mode toggle** — allow users to override system preference
-- **Export list** — CSV/JSON export of the curated influencer list
-- **Comparison view** — side-by-side comparison of selected influencers
-- **Toast notifications** — subtle feedback for add/remove actions
-- **Testing** — unit tests with Vitest + React Testing Library, E2E with Playwright
-- **Deployment** — Vercel/Netlify with automatic CI/CD
-- **Skeleton loading** — shimmer placeholders while profile data loads (CSS is already in place)
-- **API integration** — replace static JSON with real API calls and proper caching (React Query / SWR)
+- Unit tests (Vitest + React Testing Library) and E2E (Playwright)
+- Manual dark mode toggle
+- Export curated list as CSV/JSON
+- Search debouncing for API-backed data
+- Virtual scrolling for larger datasets
+- Skeleton loading placeholders
+- Real API integration (React Query / SWR)
 
 ---
 
@@ -153,31 +184,32 @@ Implemented list state with Zustand's `persist` middleware, which handles serial
 
 ```
 src/
-├── assets/data/          # Static JSON data (search results + profiles)
+├── assets/data/           # Static JSON (search + profile details)
 ├── components/
-│   ├── Avatar.tsx        # Reusable avatar with error fallback
-│   ├── EmptyState.tsx    # Reusable zero-state component
-│   ├── Layout.tsx        # App shell with header, nav, footer
-│   ├── PageHeader.tsx    # Shared page heading and subtitle
-│   ├── PlatformFilter.tsx # Platform tabs + search input
-│   ├── PlatformIcon.tsx  # Accessible platform SVG icons
-│   ├── ProfileCard.tsx   # Individual profile card
-│   ├── ProfileList.tsx   # Grid of profile cards
-│   ├── SelectedList.tsx  # Drag-and-drop selected profiles list
-│   └── VerifiedBadge.tsx # Verified account badge
+│   ├── Avatar.tsx
+│   ├── EmptyState.tsx
+│   ├── Layout.tsx         # App shell, skip link, nav
+│   ├── PageHeader.tsx     # Shared page heading
+│   ├── PlatformFilter.tsx # Platform tabs + search
+│   ├── PlatformIcon.tsx   # Accessible platform SVGs
+│   ├── ProfileCard.tsx
+│   ├── ProfileList.tsx
+│   ├── SelectedList.tsx   # Drag-and-drop curation list
+│   └── VerifiedBadge.tsx
 ├── pages/
+│   ├── SearchPage.tsx     # /
 │   ├── ProfileDetailPage.tsx  # /profile/:username
-│   ├── SearchPage.tsx         # / (home)
 │   └── SelectedListPage.tsx   # /list
 ├── store/
-│   └── selectedProfiles.ts    # Zustand store with persist
+│   └── selectedProfiles.ts    # Zustand + persist
 ├── types/
-│   └── index.ts               # TypeScript types + platform metadata
+│   └── index.ts
 ├── utils/
-│   ├── dataHelpers.ts         # Data extraction + filtering
-│   ├── formatters.ts          # Number formatting utilities
-│   └── profileLoader.ts      # Dynamic profile JSON loader
-├── App.tsx                    # Router setup
-├── main.tsx                   # Entry point
-└── index.css                  # Design system + animations
+│   ├── dataHelpers.ts
+│   ├── formatters.ts
+│   └── profileLoader.ts
+├── App.tsx
+├── main.tsx
+└── index.css              # Design tokens + utilities
+vercel.json                # SPA routing for deployment
 ```
