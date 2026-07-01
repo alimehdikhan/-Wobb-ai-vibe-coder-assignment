@@ -66,7 +66,7 @@ Implemented list state with Zustand's `persist` middleware, which handles serial
 ### 5. Architecture Refactoring
 
 - **Centralized types**: `PLATFORM_VALUES`, `PLATFORM_META` in `types/index.ts` — single source of truth for platform labels, icons, and gradient colors
-- **Shared formatters**: `formatCount()`, `formatFollowers()`, `formatEngagementRate()` — no more duplicated formatting logic
+- **Shared formatters**: `formatCount()` and `formatEngagementRate()` — no more duplicated formatting logic
 - **Reusable components**: `Avatar` (with error fallback), `EmptyState`, `VerifiedBadge` (proper SVG)
 - **Removed dead code**: Unused `onProfileClick` prop drilling, duplicate platform config objects
 - **Extracted helpers**: `buildStats()` in ProfileDetailPage for cleaner rendering logic
@@ -87,7 +87,7 @@ Implemented list state with Zustand's `persist` middleware, which handles serial
 - `aria-label` on all interactive elements
 - `aria-live="polite"` on dynamic result count
 - `aria-expanded` / `aria-controls` on collapsible selected list
-- Keyboard navigation: `Enter`/`Space` on profile cards
+- Native keyboard navigation for profile links and full arrow/Home/End navigation for platform tabs
 - `focus-visible` ring styling
 - Screen-reader friendly verified badge with `role="img"` and `aria-label`
 
@@ -97,9 +97,9 @@ Implemented list state with Zustand's `persist` middleware, which handles serial
 
 | Library | Version | Justification |
 |---------|---------|--------------|
-| `@dnd-kit/core` | latest | Modern drag-and-drop — React 19 compatible, replaces broken `react-beautiful-dnd` |
-| `@dnd-kit/sortable` | latest | Sortable preset for list reordering |
-| `@dnd-kit/utilities` | latest | CSS transform utilities for smooth drag animations |
+| `@dnd-kit/core` | `^6.3.1` | Modern drag-and-drop — React 19 compatible, replaces broken `react-beautiful-dnd` |
+| `@dnd-kit/sortable` | `^10.0.0` | Sortable preset for list reordering |
+| `@dnd-kit/utilities` | `^3.2.2` | CSS transform utilities for smooth drag animations |
 
 ## Libraries Removed
 
@@ -152,6 +152,7 @@ src/
 │   ├── Avatar.tsx        # Reusable avatar with error fallback
 │   ├── EmptyState.tsx    # Reusable zero-state component
 │   ├── Layout.tsx        # App shell with header, nav, footer
+│   ├── PageHeader.tsx    # Shared page heading and subtitle
 │   ├── PlatformFilter.tsx # Platform tabs + search input
 │   ├── PlatformIcon.tsx  # Accessible platform SVG icons
 │   ├── ProfileCard.tsx   # Individual profile card
