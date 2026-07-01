@@ -15,7 +15,7 @@ export const VerifiedBadge = memo(function VerifiedBadge({
   return (
     <span title="Verified account" className="inline-flex shrink-0">
       <svg
-        className="w-4 h-4 text-blue-500"
+        className="w-4 h-4 text-[var(--color-secondary)]"
         viewBox="0 0 24 24"
         fill="currentColor"
         aria-label="Verified"

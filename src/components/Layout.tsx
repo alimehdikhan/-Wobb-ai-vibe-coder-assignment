@@ -18,44 +18,53 @@ export function Layout({ children, title }: LayoutProps) {
       : "WobbSearch — Influencer Discovery";
   }, [title]);
 
+  const isSearch = location.pathname === "/";
+  const isList = location.pathname === "/list";
+
   return (
-    <div className="min-h-screen bg-[#f9fafb] dark:bg-gray-950 flex flex-col">
-      {/* ── Header — glassmorphism + tonal layering ──── */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800/60 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group" aria-label="WobbSearch home">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center text-white text-sm font-extrabold shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-200">
+    <div className="app-shell min-h-screen flex flex-col">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
+      <header
+        className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--surface-card)]/85 backdrop-blur-xl"
+        style={{ height: "var(--header-height)" }}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 group rounded-lg focus-visible:outline-offset-4"
+            aria-label="WobbSearch home"
+          >
+            <div
+              className="w-9 h-9 rounded-[var(--radius-md)] flex items-center justify-center text-white text-sm font-extrabold shadow-sm transition-transform duration-200 group-hover:scale-105"
+              style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-secondary))" }}
+              aria-hidden="true"
+            >
               W
             </div>
-            <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              Wobb<span className="text-purple-600 dark:text-purple-400">Search</span>
+            <span className="text-lg font-bold tracking-tight text-[var(--color-text)]">
+              Wobb<span className="text-[var(--color-primary)]">Search</span>
             </span>
           </Link>
 
-          {/* Nav — pill-shaped links */}
-          <nav className="flex items-center gap-1.5" aria-label="Main navigation">
+          <nav className="flex items-center gap-1" aria-label="Main navigation">
             <Link
               to="/"
-              className={`px-4 py-1.5 rounded-full text-[14px] font-semibold tracking-wide transition-all duration-200 ${
-                location.pathname === "/"
-                  ? "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-800/50"
-              }`}
+              className={`nav-link ${isSearch ? "nav-link-active" : ""}`}
+              aria-current={isSearch ? "page" : undefined}
             >
               Search
             </Link>
             <Link
               to="/list"
-              className={`px-4 py-1.5 rounded-full text-[14px] font-semibold tracking-wide transition-all duration-200 inline-flex items-center gap-2 ${
-                location.pathname === "/list"
-                  ? "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-800/50"
-              }`}
+              className={`nav-link ${isList ? "nav-link-active" : ""}`}
+              aria-current={isList ? "page" : undefined}
             >
               My List
               {count > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-purple-600 rounded-full leading-none">
+                <span className="badge-count" aria-label={`${count} selected`}>
                   {count}
                 </span>
               )}
@@ -64,16 +73,18 @@ export function Layout({ children, title }: LayoutProps) {
         </div>
       </header>
 
-      {/* ── Main — max-width container ──────────────── */}
-      <main className="flex-1 max-w-[1280px] w-full mx-auto px-6 sm:px-8 py-10">
+      <main
+        id="main-content"
+        className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        tabIndex={-1}
+      >
         {children}
       </main>
 
-      {/* ── Footer ─────────────────────────────────── */}
-      <footer className="border-t border-gray-200/50 dark:border-gray-800/50 py-6 bg-white/50 dark:bg-gray-950/50">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 flex items-center justify-between text-[12px] text-gray-400 dark:text-gray-600">
+      <footer className="border-t border-[var(--color-border)] py-6 mt-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[var(--color-text-muted)]">
           <span>© 2026 WobbSearch</span>
-          <span className="hidden sm:inline">Influencer Discovery Platform</span>
+          <span>Influencer Discovery Platform</span>
         </div>
       </footer>
     </div>

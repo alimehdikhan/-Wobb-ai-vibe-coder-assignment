@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import type { Platform } from "@/types";
 import { PLATFORM_META } from "@/types";
 import { Layout } from "@/components/Layout";
+import { PageHeader } from "@/components/PageHeader";
 import { PlatformFilter } from "@/components/PlatformFilter";
 import { ProfileList } from "@/components/ProfileList";
 import { SelectedList } from "@/components/SelectedList";
@@ -28,37 +29,42 @@ export function SearchPage() {
 
   return (
     <Layout>
-      {/* Hero */}
-      <div className="text-center mb-8 animate-slide-up">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">
-          Discover{" "}
-          <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-            Top Influencers
-          </span>
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base max-w-lg mx-auto">
-          Browse and curate creators across Instagram, YouTube, and TikTok
-        </p>
-      </div>
-
-      {/* Filters */}
-      <PlatformFilter
-        selected={platform}
-        onChange={handlePlatformChange}
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
+      <PageHeader
+        title="Discover"
+        accent="Top Influencers"
+        subtitle="Search, explore, and curate creators across Instagram, YouTube, and TikTok."
       />
 
-      {/* Results count */}
-      <p className="text-xs text-gray-400 dark:text-gray-500 mt-6 mb-4 text-center" aria-live="polite">
-        Showing <strong className="text-gray-600 dark:text-gray-300">{filtered.length}</strong> of{" "}
-        {allProfiles.length} profiles on {PLATFORM_META[platform].label}
-      </p>
+      <section aria-labelledby="filters-heading" className="mb-8">
+        <h2 id="filters-heading" className="sr-only">
+          Search and filter influencers
+        </h2>
+        <div className="filter-panel">
+          <PlatformFilter
+            selected={platform}
+            onChange={handlePlatformChange}
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+          />
+        </div>
+      </section>
 
-      {/* Profile grid */}
-      <ProfileList profiles={filtered} platform={platform} />
+      <section aria-labelledby="results-heading">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5">
+          <div>
+            <p id="results-heading" className="section-label mb-1">
+              Results
+            </p>
+            <p className="text-sm font-medium text-[var(--color-text)]" aria-live="polite">
+              {filtered.length} of {allProfiles.length} on{" "}
+              <span className="text-[var(--color-primary)]">{PLATFORM_META[platform].label}</span>
+            </p>
+          </div>
+        </div>
 
-      {/* Selected profiles preview */}
+        <ProfileList profiles={filtered} platform={platform} />
+      </section>
+
       <SelectedList compact />
     </Layout>
   );

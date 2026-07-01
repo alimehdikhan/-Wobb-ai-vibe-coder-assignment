@@ -22,99 +22,100 @@ export const ProfileCard = memo(function ProfileCard({
     s.profiles.some((p) => p.username === profile.username)
   );
 
-  const handleAddToList = useCallback(
-    () => {
-      addProfile({ ...profile, platform });
-    },
-    [addProfile, profile, platform]
-  );
+  const handleAddToList = useCallback(() => {
+    addProfile({ ...profile, platform });
+  }, [addProfile, profile, platform]);
 
   const meta = PLATFORM_META[platform];
 
   return (
-    <article className="group relative bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden animate-fade-in">
-      {/* Platform accent */}
+    <article className="surface-card group overflow-hidden animate-fade-in transition-shadow duration-300 hover:shadow-[var(--shadow-lg)]">
       <div
-        className={`h-1 bg-gradient-to-r ${meta.gradient} opacity-60 group-hover:opacity-100 transition-opacity`}
+        className={`h-1 bg-gradient-to-r ${meta.gradient} opacity-70 group-hover:opacity-100 transition-opacity`}
+        aria-hidden="true"
       />
 
-      <div className="p-4 sm:p-5 flex items-center gap-3">
-        <Link
-          to={`/profile/${profile.username}?platform=${platform}`}
-          className="flex-1 min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
-          aria-label={`View ${profile.fullname}'s profile`}
-        >
-          <div className="flex items-center gap-4">
+      <div className="p-4 sm:p-5">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <Link
+            to={`/profile/${profile.username}?platform=${platform}`}
+            className="flex flex-1 min-w-0 gap-3 sm:gap-4 rounded-[var(--radius-md)] focus-visible:outline-offset-2"
+            aria-label={`View ${profile.fullname}'s profile`}
+          >
             <div className="relative shrink-0">
-              <Avatar src={profile.picture} alt={profile.fullname} size="md" />
-              <div className="absolute -bottom-1 -right-1 p-0.5 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-100 dark:border-gray-700/60 flex items-center justify-center">
+              <Avatar src={profile.picture} alt="" size="md" />
+              <div className="absolute -bottom-1 -right-1 p-0.5 bg-[var(--surface-card)] rounded-full shadow-sm border border-[var(--color-border)] flex items-center justify-center">
                 <PlatformIcon platform={platform} className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm sm:text-base">
+            <div className="flex-1 min-w-0 pt-0.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-bold text-[var(--color-text)] truncate text-sm sm:text-base">
                   @{profile.username}
                 </span>
                 <VerifiedBadge verified={profile.is_verified} />
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-sm text-[var(--color-text-secondary)] truncate mt-0.5">
                 {profile.fullname}
               </p>
-            </div>
 
-            {/* Stats */}
-            <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0 text-right">
-              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {formatCount(profile.followers)}
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                followers
-              </span>
-            </div>
-
-            {/* Engagement rate */}
-            {profile.engagement_rate !== undefined && (
-              <div className="hidden md:flex flex-col items-end gap-0.5 shrink-0 text-right">
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                  {formatEngagementRate(profile.engagement_rate)}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 sm:hidden">
+                <span className="text-xs font-semibold text-[var(--color-text)]">
+                  {formatCount(profile.followers)} followers
                 </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  engagement
-                </span>
+                {profile.engagement_rate !== undefined && (
+                  <span className="text-xs font-semibold text-[var(--color-success)]">
+                    {formatEngagementRate(profile.engagement_rate)} eng.
+                  </span>
+                )}
               </div>
-            )}
-          </div>
+            </div>
 
-        {/* Mobile stats row */}
-          <div className="flex sm:hidden items-center gap-3 mt-3 text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              {formatCount(profile.followers)} followers
-            </span>
-            {profile.engagement_rate !== undefined && (
+            <div className="hidden sm:flex items-center gap-4 shrink-0">
+              <div className="stat-pill">
+                <span className="stat-pill-value">{formatCount(profile.followers)}</span>
+                <span className="stat-pill-label">Followers</span>
+              </div>
+              {profile.engagement_rate !== undefined && (
+                <div className="stat-pill">
+                  <span className="stat-pill-value stat-pill-value--accent">
+                    {formatEngagementRate(profile.engagement_rate)}
+                  </span>
+                  <span className="stat-pill-label">Engagement</span>
+                </div>
+              )}
+            </div>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleAddToList}
+            disabled={isSelected}
+            aria-label={
+              isSelected
+                ? `${profile.username} already in list`
+                : `Add ${profile.username} to list`
+            }
+            className={`btn shrink-0 self-center ${isSelected ? "btn-success" : "btn-primary"}`}
+          >
+            {isSelected ? (
               <>
-                <span className="text-gray-300 dark:text-gray-600">·</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                  {formatEngagementRate(profile.engagement_rate)} eng.
-                </span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="hidden min-[380px]:inline">Added</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="hidden min-[380px]:inline">Add</span>
               </>
             )}
-          </div>
-        </Link>
-
-        <button
-          onClick={handleAddToList}
-          disabled={isSelected}
-          aria-label={isSelected ? `${profile.username} already in list` : `Add ${profile.username} to list`}
-          className={`shrink-0 px-3.5 py-2 text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer ${
-            isSelected
-              ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 cursor-default ring-1 ring-green-200 dark:ring-green-800"
-              : "bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 shadow-sm hover:shadow-md active:scale-95"
-          }`}
-        >
-          {isSelected ? "Added" : "Add"}
-        </button>
+          </button>
+        </div>
       </div>
     </article>
   );

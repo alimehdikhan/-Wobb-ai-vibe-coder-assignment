@@ -53,7 +53,7 @@ export const Avatar = memo(function Avatar({
       alt={alt}
       loading="lazy"
       onError={handleError}
-      className={`${sizeClasses[size]} rounded-full object-cover shrink-0 ring-2 ring-gray-100 dark:ring-gray-700 ${className}`}
+      className={`${sizeClasses[size]} rounded-full object-cover shrink-0 ring-2 ring-[var(--color-border)] ${className}`}
     />
   );
 });
