@@ -2,6 +2,12 @@
 
 A modern React application for searching, exploring, and curating influencer profiles across Instagram, YouTube, and TikTok.
 
+## Live Demo
+
+**[https://wobb-ai-vibe-coder-assignment.vercel.app/](https://wobb-ai-vibe-coder-assignment.vercel.app/)**
+
+Deployed on Vercel with SPA routing for `/`, `/list`, and `/profile/:username`.
+
 ## Getting Started
 
 ```bash
