@@ -33,12 +33,28 @@ export const PlatformFilter = memo(function PlatformFilter({
   const handleTabKeyDown = useCallback(
     (e: React.KeyboardEvent, platform: Platform) => {
       const idx = PLATFORM_VALUES.indexOf(platform);
+      let nextPlatform: Platform | undefined;
+
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
-        onChange(PLATFORM_VALUES[(idx + 1) % PLATFORM_VALUES.length]);
+        nextPlatform = PLATFORM_VALUES[(idx + 1) % PLATFORM_VALUES.length];
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        onChange(PLATFORM_VALUES[(idx - 1 + PLATFORM_VALUES.length) % PLATFORM_VALUES.length]);
+        nextPlatform =
+          PLATFORM_VALUES[(idx - 1 + PLATFORM_VALUES.length) % PLATFORM_VALUES.length];
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        nextPlatform = PLATFORM_VALUES[0];
+      } else if (e.key === "End") {
+        e.preventDefault();
+        nextPlatform = PLATFORM_VALUES[PLATFORM_VALUES.length - 1];
+      }
+
+      if (nextPlatform) {
+        onChange(nextPlatform);
+        requestAnimationFrame(() => {
+          document.getElementById(`tab-${nextPlatform}`)?.focus();
+        });
       }
     },
     [onChange]
