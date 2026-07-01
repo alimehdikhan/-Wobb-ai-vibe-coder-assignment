@@ -1,5 +1,6 @@
 import type { Platform, ProfileDetailResponse } from "@/types";
 import { extractProfiles } from "@/utils/dataHelpers";
+import { resolveProfilePicture } from "@/utils/avatarResolver";
 
 const profileModules = import.meta.glob<ProfileDetailResponse>(
   "../assets/data/profiles/*.json"
@@ -28,7 +29,10 @@ export async function loadProfileByUsername(
   return {
     data: {
       success: true,
-      user_profile: profile,
+      user_profile: {
+        ...profile,
+        picture: resolveProfilePicture(profile.username, profile.picture),
+      },
     },
   };
 }

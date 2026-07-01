@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 
 interface AvatarProps {
   src: string;
@@ -8,11 +8,11 @@ interface AvatarProps {
 }
 
 const sizeClasses: Record<string, string> = {
-  sm: "w-9 h-9",
-  md: "w-12 h-12",
-  card: "w-16 h-16",
-  lg: "w-16 h-16",
-  xl: "w-24 h-24 sm:w-28 sm:h-28",
+  sm: "avatar--sm",
+  md: "avatar--md",
+  card: "avatar--card",
+  lg: "avatar--lg",
+  xl: "avatar--xl",
 };
 
 const textSizeClasses: Record<string, string> = {
@@ -24,7 +24,7 @@ const textSizeClasses: Record<string, string> = {
 };
 
 /**
- * Avatar with graceful fallback to initials on image load error.
+ * Avatar with centered, aspect-preserving image and initials fallback on load failure.
  */
 export const Avatar = memo(function Avatar({
   src,
@@ -32,42 +32,50 @@ export const Avatar = memo(function Avatar({
   size = "md",
   className = "",
 }: AvatarProps) {
-  const [error, setError] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const normalizedSrc = src?.trim() ?? "";
 
-  const handleError = useCallback(() => setError(true), []);
+  useEffect(() => {
+    setFailed(false);
+  }, [normalizedSrc]);
 
-  const initials = (alt || "?")
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "?";
+  const handleError = useCallback(() => setFailed(true), []);
+
+  const initials =
+    (alt || "?")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   const sizeClass = sizeClasses[size];
   const textClass = textSizeClasses[size];
-
-  if (error || !src) {
-    return (
-      <div
-        className={`${sizeClass} rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white font-bold shrink-0 aspect-square ${className}`}
-        aria-label={alt || "Profile avatar"}
-        role="img"
-      >
-        <span className={textClass}>{initials}</span>
-      </div>
-    );
-  }
+  const showFallback = failed || !normalizedSrc;
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onError={handleError}
-      className={`${sizeClass} rounded-full object-cover object-center shrink-0 aspect-square ring-2 ring-[var(--color-border-subtle)] bg-[var(--surface-muted)] ${className}`}
-    />
+    <div
+      className={`avatar ${sizeClass} ${className}`.trim()}
+      aria-label={alt || "Profile avatar"}
+      role="img"
+    >
+      {!showFallback ? (
+        <img
+          key={normalizedSrc}
+          src={normalizedSrc}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          onError={handleError}
+          className="avatar__image"
+        />
+      ) : (
+        <span className={`avatar__initials ${textClass}`} aria-hidden="true">
+          {initials}
+        </span>
+      )}
+    </div>
   );
 });

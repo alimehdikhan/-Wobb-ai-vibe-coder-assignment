@@ -2,6 +2,7 @@ import instagramData from "@/assets/data/search/instagram.json";
 import youtubeData from "@/assets/data/search/youtube.json";
 import tiktokData from "@/assets/data/search/tiktok.json";
 import type { Platform, SearchData, UserProfileSummary } from "@/types";
+import { resolveProfilePicture } from "@/utils/avatarResolver";
 
 const platformData: Record<Platform, SearchData> = {
   instagram: instagramData as SearchData,
@@ -32,9 +33,12 @@ export function extractProfiles(platform: Platform): UserProfileSummary[] {
       username?: string;
     };
 
+    const username = profile.username ?? profile.handle ?? profile.user_id;
+
     return {
       ...profile,
-      username: profile.username ?? profile.handle ?? profile.user_id,
+      username,
+      picture: resolveProfilePicture(username, profile.picture),
       platform,
     };
   });
