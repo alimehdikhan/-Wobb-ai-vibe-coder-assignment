@@ -49,14 +49,19 @@ function buildStats(user: FullUserProfile): StatDef[] {
   return stats;
 }
 
-export function ProfileDetailPage() {
-  const { username } = useParams<{ username: string }>();
-  const [searchParams] = useSearchParams();
-  const platformParam = searchParams.get("platform") || "instagram";
-  const platform = (["instagram", "youtube", "tiktok"].includes(platformParam)
-    ? platformParam
+function parsePlatform(platformParam: string | null): Platform {
+  const value = platformParam || "instagram";
+  return (["instagram", "youtube", "tiktok"].includes(value)
+    ? value
     : "instagram") as Platform;
+}
 
+interface ProfileDetailContentProps {
+  username: string;
+  platform: Platform;
+}
+
+function ProfileDetailContent({ username, platform }: ProfileDetailContentProps) {
   const [profileData, setProfileData] = useState<FullUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -67,11 +72,7 @@ export function ProfileDetailPage() {
   );
 
   useEffect(() => {
-    if (!username) return;
     let cancelled = false;
-
-    setLoading(true);
-    setError(false);
 
     loadProfileByUsername(username).then((data) => {
       if (cancelled) return;
@@ -89,23 +90,6 @@ export function ProfileDetailPage() {
   }, [username]);
 
   const meta = PLATFORM_META[platform];
-
-  // ── Invalid username ──
-  if (!username) {
-    return (
-      <Layout>
-        <div className="text-center py-20">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Invalid profile</p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-          >
-            ← Back to search
-          </Link>
-        </div>
-      </Layout>
-    );
-  }
 
   // ── Loading ──
   if (loading) {
@@ -335,4 +319,29 @@ export function ProfileDetailPage() {
       </div>
     </Layout>
   );
+}
+
+export function ProfileDetailPage() {
+  const { username } = useParams<{ username: string }>();
+  const [searchParams] = useSearchParams();
+  const platform = parsePlatform(searchParams.get("platform"));
+
+  // ── Invalid username ──
+  if (!username) {
+    return (
+      <Layout>
+        <div className="text-center py-20">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Invalid profile</p>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
+          >
+            ← Back to search
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  return <ProfileDetailContent key={username} username={username} platform={platform} />;
 }

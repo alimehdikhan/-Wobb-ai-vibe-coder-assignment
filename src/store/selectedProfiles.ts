@@ -12,17 +12,11 @@ interface SelectedProfilesState {
   /** Remove a profile by username */
   removeProfile: (username: string) => void;
 
-  /** Toggle a profile — add if missing, remove if present */
-  toggleProfile: (profile: UserProfileSummary) => void;
-
   /** Reorder profiles (drag-and-drop) */
   reorderProfiles: (profiles: UserProfileSummary[]) => void;
 
   /** Clear the entire list */
   clear: () => void;
-
-  /** Check if a profile is selected */
-  isSelected: (username: string) => boolean;
 }
 
 export const useSelectedProfiles = create<SelectedProfilesState>()(
@@ -40,16 +34,6 @@ export const useSelectedProfiles = create<SelectedProfilesState>()(
         set({ profiles: get().profiles.filter((p) => p.username !== username) });
       },
 
-      toggleProfile: (profile) => {
-        const { profiles } = get();
-        const exists = profiles.some((p) => p.username === profile.username);
-        if (exists) {
-          set({ profiles: profiles.filter((p) => p.username !== profile.username) });
-        } else {
-          set({ profiles: [...profiles, profile] });
-        }
-      },
-
       reorderProfiles: (reordered) => {
         set({ profiles: reordered });
       },
@@ -57,13 +41,10 @@ export const useSelectedProfiles = create<SelectedProfilesState>()(
       clear: () => {
         set({ profiles: [] });
       },
-
-      isSelected: (username) => {
-        return get().profiles.some((p) => p.username === username);
-      },
     }),
     {
       name: "wobb-selected-profiles",
+      partialize: (state) => ({ profiles: state.profiles }),
     }
   )
 );

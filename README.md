@@ -38,10 +38,7 @@ Open [http://localhost:5173](http://localhost:5173) to view the app.
 
 ### 2. State Management — Zustand
 
-Replaced the manual localStorage persistence pattern with Zustand's built-in `persist` middleware:
-- **Before**: Manual `localStorage.getItem/setItem` calls in every action
-- **After**: `persist()` middleware handles serialization, deserialization, and error recovery automatically
-- Added `toggleProfile` action and `isSelected` helper
+Implemented list state with Zustand's `persist` middleware, which handles serialization and rehydration through `localStorage`.
 
 ### 3. UI/UX Redesign
 
@@ -82,7 +79,7 @@ Replaced the manual localStorage persistence pattern with Zustand's built-in `pe
 - **Zustand selectors**: Fine-grained selectors like `(s) => s.profiles.length` for count-only subscriptions
 - **Image lazy loading**: `loading="lazy"` on all profile images
 - **Data memoization**: `extractProfiles()` caches results by platform to avoid re-mapping
-- **Bundle size**: Reduced main JS bundle from 376KB → 323KB by removing `react-beautiful-dnd` dependency tree
+- **Bundle size**: Approximately 330KB for the main production JavaScript bundle
 
 ### 7. Accessibility
 
@@ -156,6 +153,7 @@ src/
 │   ├── EmptyState.tsx    # Reusable zero-state component
 │   ├── Layout.tsx        # App shell with header, nav, footer
 │   ├── PlatformFilter.tsx # Platform tabs + search input
+│   ├── PlatformIcon.tsx  # Accessible platform SVG icons
 │   ├── ProfileCard.tsx   # Individual profile card
 │   ├── ProfileList.tsx   # Grid of profile cards
 │   ├── SelectedList.tsx  # Drag-and-drop selected profiles list

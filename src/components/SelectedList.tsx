@@ -119,9 +119,11 @@ interface SelectedListProps {
 }
 
 export function SelectedList({ compact = true }: SelectedListProps) {
-  const { profiles, removeProfile, reorderProfiles, clear } =
-    useSelectedProfiles();
-  const [expanded, setExpanded] = useState(!compact);
+  const profiles = useSelectedProfiles((state) => state.profiles);
+  const removeProfile = useSelectedProfiles((state) => state.removeProfile);
+  const reorderProfiles = useSelectedProfiles((state) => state.reorderProfiles);
+  const clear = useSelectedProfiles((state) => state.clear);
+  const [expanded, setExpanded] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -148,37 +150,42 @@ export function SelectedList({ compact = true }: SelectedListProps) {
 
   if (profiles.length === 0) return null;
 
-  const displayProfiles = compact && !expanded ? profiles.slice(0, 3) : profiles;
+  const isCollapsedPreview = compact && !expanded;
+  const displayProfiles = isCollapsedPreview ? profiles.slice(0, 3) : profiles;
 
   return (
     <div className="mt-10 mb-8 animate-slide-up">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 max-w-2xl mx-auto">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
-          aria-expanded={expanded}
-          aria-controls="selected-profiles-list"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-purple-500" aria-hidden="true" />
-            Selected Profiles
-            <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold text-white bg-purple-500 rounded-full">
-              {profiles.length}
-            </span>
-          </div>
-          <svg
-            className={`w-4 h-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
+      <div className={`flex items-center mb-4 max-w-2xl mx-auto ${compact ? "justify-between" : "justify-end"}`}>
+        {compact && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
+            aria-expanded={expanded}
+            aria-controls="selected-profiles-list"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-purple-500" aria-hidden="true" />
+              Selected Profiles
+              <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold text-white bg-purple-500 rounded-full">
+                {profiles.length}
+              </span>
+            </div>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        )}
         <button
-          onClick={clear}
+          onClick={() => {
+            if (window.confirm("Clear all selected profiles?")) clear();
+          }}
           className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors cursor-pointer"
           aria-label="Clear all selected profiles"
         >
@@ -187,39 +194,40 @@ export function SelectedList({ compact = true }: SelectedListProps) {
       </div>
 
       {/* List */}
-      {expanded && (
-        <div id="selected-profiles-list" className="max-w-2xl mx-auto">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+      <div
+        id="selected-profiles-list"
+        className="max-w-2xl mx-auto"
+      >
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={displayProfiles.map((p) => p.username)}
+            strategy={verticalListSortingStrategy}
           >
-            <SortableContext
-              items={displayProfiles.map((p) => p.username)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="flex flex-col gap-2">
-                {displayProfiles.map((profile) => (
-                  <SortableItem
-                    key={profile.username}
-                    profile={profile}
-                    onRemove={removeProfile}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+            <div className="flex flex-col gap-2">
+              {displayProfiles.map((profile) => (
+                <SortableItem
+                  key={profile.username}
+                  profile={profile}
+                  onRemove={removeProfile}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
-          {compact && profiles.length > 3 && !expanded && (
-            <button
-              onClick={() => setExpanded(true)}
-              className="mt-3 w-full text-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium py-2 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors cursor-pointer"
-            >
-              View all {profiles.length} profiles →
-            </button>
-          )}
-        </div>
-      )}
+        {isCollapsedPreview && profiles.length > 3 && (
+          <button
+            onClick={() => setExpanded(true)}
+            className="mt-3 w-full text-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 font-medium py-2 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors cursor-pointer"
+          >
+            View all {profiles.length} profiles →
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -27,10 +27,17 @@ export function extractProfiles(platform: Platform): UserProfileSummary[] {
   if (cached) return cached;
 
   const data = getSearchData(platform);
-  const profiles = data.accounts.map((item) => ({
-    ...item.account.user_profile,
-    platform,
-  }));
+  const profiles = data.accounts.map((item) => {
+    const profile = item.account.user_profile as UserProfileSummary & {
+      username?: string;
+    };
+
+    return {
+      ...profile,
+      username: profile.username ?? profile.handle ?? profile.user_id,
+      platform,
+    };
+  });
   profileCache.set(platform, profiles);
   return profiles;
 }
